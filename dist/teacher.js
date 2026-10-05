@@ -52,7 +52,7 @@
 
   function fillFilters() {
     $("courseFilter").innerHTML = options(unique("courseId"), "Барлык курслар");
-    $("groupFilter").innerHTML = options(unique("group"), "Барлык төркемнәр");
+    $("groupFilter").innerHTML = options(unique("group"), "Все группы");
     $("lessonFilter").innerHTML = options(unique("lessonId"), "Барлык дәресләр");
     $("studentFilter").innerHTML = options(unique("studentName"), "Барлык укучылар");
   }
@@ -133,7 +133,7 @@
   }
 
   function exportCsv() {
-    const header = ["Вакыт", "Укучы", "Төркем", "Курс", "Дәрес", "Тема", "Дөрес", "Барлыгы", "Процент", "Вакыт секунд"];
+    const header = ["Вакыт", "Укучы", "Группа", "Курс", "Дәрес", "Тема", "Дөрес", "Барлыгы", "Процент", "Вакыт секунд"];
     const values = filtered().map((item) => [item.submittedAt, item.studentName, item.group, item.courseId, item.lessonId, item.lessonTitle, item.score, item.total, item.percent, item.durationSeconds]);
     const csv = [header, ...values].map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\r\n");
     const link = document.createElement("a");

@@ -143,6 +143,10 @@ select, input {
   background: white;
   font-size: 1rem;
 }
+#studentGroup, #shareGroup { min-height: 60px; font-size: 1.08rem; font-weight: 800; }
+#studentGroup option, #shareGroup option { font-weight: 700; }
+#studentGroup optgroup, #shareGroup optgroup { font-weight: 800; }
+label[for="studentGroup"], label[for="shareGroup"] { font-size: 1rem; font-weight: 800; }
 
 .lesson-meta { min-height: 48px; margin: 14px 2px 20px; color: var(--muted); font-size: .88rem; line-height: 1.5; }
 .share-button { width: 100%; margin-top: 12px; }
@@ -152,7 +156,7 @@ select, input {
 .lesson-panel input { margin-bottom: 16px; }
 .assigned-group { margin: 2px 0 18px; padding: 12px 14px; border-radius: 12px; background: #eef7f1; }
 .assigned-group span { display: block; color: var(--muted); font-size: .78rem; }
-.assigned-group strong { color: var(--green); }
+.assigned-group strong { color: var(--green); font-size: 1.08rem; font-weight: 800; }
 .privacy-note { margin: 0 0 16px; color: var(--muted); font-size: .78rem; line-height: 1.5; }
 .share-group-label { margin-top: 18px; }
 .submission-status { margin: 16px 0 0; color: var(--green-2); font-size: .88rem; font-weight: 700; text-align: center; }
