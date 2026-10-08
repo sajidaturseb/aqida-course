@@ -195,7 +195,6 @@
     const percent = Math.round(score / total * 100);
     setBest(score, total);
     markCompleted(state.lesson.id, percent);
-    if (lockedLesson && state.student) submitResult(score, total, percent);
     const mistakes = state.lesson.questions.map((question, index) => ({ question, answer: state.answers[index] })).filter((item) => item.answer !== item.question.answer);
     const review = mistakes.length ? mistakes.map((item) => {
       const chosen = item.question.options.find((option) => option.key === item.answer);
@@ -206,6 +205,7 @@
     app.innerHTML = `<section class="result-card"><div class="result-top"><div class="score-ring" style="--score:${percent * 3.6}deg"><strong>${percent}%</strong></div><div><p class="eyebrow">Тест тәмамланды</p><h2>${score} / ${total} дөрес</h2><p class="result-summary">${message}</p></div></div><div class="result-actions"><button class="secondary" id="homeResult" type="button">${lockedLesson ? "Дәрес башына" : "Башка дәрес"}</button><button class="primary" id="retryButton" type="button">Тагын бер тапкыр</button></div>${lockedLesson ? '<p class="submission-status" id="submissionStatus" aria-live="polite">Нәтиҗә җибәрелә…</p>' : ""}<div class="review"><h3>${mistakes.length ? `Хаталар өстендә эш (${mistakes.length})` : "Нәтиҗә"}</h3><div class="review-list">${review}</div></div></section>`;
     document.getElementById("homeResult").addEventListener("click", renderHome);
     document.getElementById("retryButton").addEventListener("click", () => startQuiz(state.lesson, state.student));
+    if (lockedLesson && state.student) submitResult(score, total, percent);
     focusMain();
   }
 
