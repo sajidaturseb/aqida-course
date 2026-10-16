@@ -1,17 +1,17 @@
 :root {
   color-scheme: light;
-  --ink: #1d2742;
-  --muted: #66708a;
-  --paper: #fffdf7;
-  --canvas: #eef1f8;
-  --green: #172554;
-  --green-2: #31549b;
-  --gold: #c99a3c;
-  --gold-soft: #f5e9c9;
-  --line: #d9dfec;
+  --ink: #2b3d2a;
+  --muted: #5b7059;
+  --paper: #fffef9;
+  --canvas: #f1f9e9;
+  --green: #3e652f;
+  --green-2: #6e983f;
+  --gold: #ba9b54;
+  --gold-soft: #f8efd8;
+  --line: #d5e6c8;
   --good: #237659;
   --bad: #b44236;
-  --shadow: 0 18px 50px rgba(23, 37, 84, .12);
+  --shadow: 0 18px 50px rgba(62, 101, 47, .12);
 }
 
 * { box-sizing: border-box; }
@@ -22,8 +22,8 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at 0 0, rgba(214, 168, 79, .12), transparent 24rem),
-    linear-gradient(135deg, #edf1f8 0%, #fbf7ed 100%);
+    radial-gradient(circle at 0 0, rgba(154, 195, 112, .21), transparent 28rem),
+    linear-gradient(135deg, #f1f9e9 0%, #fffdf4 55%, #edf7e7 100%);
   font-family: Manrope, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
@@ -351,4 +351,48 @@ footer { padding: 22px 0 28px; color: var(--muted); text-align: center; font-siz
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+
+/* Крупный шрифт и светло-салатовая гамма для спокойного чтения. */
+body { font-size: 21px; line-height: 1.7; }
+.shell { width: min(1320px, calc(100% - 28px)); }
+.topbar { min-height: 88px; }
+.brand { font-size: clamp(1.35rem, 2vw, 1.9rem); }
+.brand-mark { width: 50px; height: 50px; color: #fff; background: linear-gradient(145deg, #436d35, #80ab4c); }
+.lead, .panel-note, .module-copy small, .section-heading > p, .result-summary { font-size: clamp(1.18rem, 1.65vw, 1.4rem); line-height: 1.65; }
+.eyebrow, .best-score, .stat span, .lesson-meta, .lesson-breadcrumb, .privacy-note, .share-status, .submission-status, .quiz-head-row, .question-number, .book-check, footer { font-size: 1rem; }
+.panel h2, .module-copy strong { font-size: clamp(1.45rem, 2.2vw, 1.8rem); }
+.course-module { border-color: #cadfb7; }
+.course-module:nth-child(3n + 1) { background: #f4fbe9; }
+.course-module:nth-child(3n + 2) { background: #fffaf0; }
+.course-module:nth-child(3n) { background: #f0f8f0; }
+.module-number, .lesson-index { font-size: 1.15rem; }
+.module-copy small, .module-meta small, .lesson-name small { font-size: 1rem; }
+.module-meta, .lesson-name { font-size: 1.22rem; }
+.course-lesson { min-height: 76px; }
+.course-lesson:hover, .course-lesson.completed, .option.selected, .assigned-group { background: #eaf6db; }
+.course-lesson.attempted { background: #fff4dc; }
+.study-step { padding: 23px 25px; border-color: #d4e5c4; }
+.study-step:nth-child(3n + 1) { background: #f1f9e9; }
+.study-step:nth-child(3n + 2) { background: #fff9ec; }
+.study-step:nth-child(3n) { background: #eff8f4; }
+.study-step h2 { font-size: clamp(1.4rem, 2vw, 1.8rem); }
+.study-step p, .book-check { font-size: clamp(1.18rem, 1.55vw, 1.35rem); line-height: 1.7; }
+.study-step strong { font-size: 1.1rem; }
+label, select, input, .option, .primary, .secondary { font-size: clamp(1.12rem, 1.5vw, 1.3rem); }
+select, input, .primary, .secondary { min-height: 62px; }
+.option { min-height: 76px; padding: 18px 20px; line-height: 1.6; }
+.question-text { font-size: clamp(1.7rem, 2.6vw, 2.3rem); line-height: 1.45; }
+.review-item, .review-item span, .result-summary { font-size: 1.2rem; line-height: 1.65; }
+.quiz-card, .result-card, .panel { background: #fffef9; }
+.progress-card { background: linear-gradient(145deg, #426933, #7ca449); }
+.progress-card .progress-label, .progress-card p { color: #f3ffe9; font-size: 1rem; }
+.progress-card .primary { color: #3e652f; background: #fff4dc; }
+@media (max-width: 520px) {
+  body { font-size: 19px; }
+  .shell { width: calc(100% - 14px); }
+  .course-module summary { min-height: 100px; }
+  .module-copy small, .lesson-name small { font-size: .98rem; }
+  .study-step { padding: 19px 17px; }
+  .study-step p, .book-check, .option { font-size: 1.15rem; }
 }
