@@ -17,21 +17,32 @@
     <header class="topbar">
       <button class="brand" id="homeButton" type="button" aria-label="Баш биткә кайту">
         <span class="brand-mark" aria-hidden="true">۞</span>
-        <span>Гакыйдә курсы</span>
+        <span id="brandName">Гакыйдә курсы</span>
       </button>
-      <div class="best-score" id="bestScore" aria-live="polite"></div>
+      <div class="topbar-tools">
+        <div class="language-switch" id="languageSwitch" aria-label="Тел / Язык">
+          <button type="button" data-lang="tt" aria-pressed="true">Татарча</button>
+          <button type="button" data-lang="ru" aria-pressed="false">Русский</button>
+        </div>
+        <div class="best-score" id="bestScore" aria-live="polite"></div>
+      </div>
     </header>
 
     <main id="app" tabindex="-1"></main>
 
-    <footer>
+    <footer id="pageFooter">
       «Гакыйдә. Җиңел юл белән аңлау һәм өйрәнү» дәреслеге буенча онлайн курс
     </footer>
   </div>
 
   <script src="questions.js?v=aqida-1"></script>
   <script src="course.js?v=aqida-1"></script>
+  <script src="page-corrections.js?v=20261021"></script>
+  <script src="course-2-ru.js?v=review-20261021"></script>
+  <script src="course-2-ru-more.js?v=review-20261021"></script>
+  <script src="course-2-ru-names.js?v=review-20261021"></script>
+  <script src="course-2-ru-review.js?v=review-20261021"></script>
   <script src="config.js?v=aqida-1"></script>
-  <script src="app.js?v=groups-20261005"></script>
+  <script src="app.js?v=aqida-ru-course2-20261021"></script>
 </body>
 </html>
