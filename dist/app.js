@@ -59,9 +59,15 @@
     ["Башка дәрес", "Другой урок"],
     ["Тагын бер тапкыр", "Пройти ещё раз"],
     ["Нәтиҗә", "Результат"],
-    ["Нәтиҗә җибәрелә…", "Результат отправляется…"]
+    ["Нәтиҗә җибәрелә…", "Результат отправляется…"],
+    ["Нәтиҗә, исем һәм группа укытучы журналына җибәрелә.", "Результат, имя и группа отправляются в журнал преподавателя."]
   ]);
   function ruActive() { return currentLang === "ru" && activeCourseId === 2; }
+  function questionCountRu(count) {
+    const lastTwo = count % 100;
+    const last = count % 10;
+    return `${count} ${lastTwo >= 11 && lastTwo <= 14 ? "вопросов" : last === 1 ? "вопрос" : last >= 2 && last <= 4 ? "вопроса" : "вопросов"}`;
+  }
   function bookTitle() { return ruActive() ? "Акыда. Просто о сложном" : program.bookTitle; }
   function localizeLesson(lesson) {
     const translated = ruActive() && lesson.course === 2 && russianLessons[lesson.id];
@@ -84,7 +90,7 @@
       const original = node.nodeValue;
       const trimmed = original.trim();
       let translated = ruUi.get(trimmed);
-      if (!translated) translated = trimmed.replace(/^(\d+) нче курс$/, "Курс $1").replace(/^(\d+) нче дәрес$/, "Урок $1").replace(/^(\d+) нче сорау$/, "Вопрос $1").replace(/^(\d+) сорау$/, "$1 вопросов").replace(/^([\d, –-]+) нче бит$/, "стр. $1");
+      if (!translated) translated = trimmed.replace(/^(\d+) нче курс$/, "Курс $1").replace(/^(\d+) нче дәрес$/, "Урок $1").replace(/^(\d+) нче сорау$/, "Вопрос $1").replace(/^(\d+) сорау$/, (_, count) => questionCountRu(Number(count))).replace(/^([\d, –-]+) нче бит$/, "стр. $1");
       if (translated !== trimmed) node.nodeValue = original.replace(trimmed, translated);
     }
   }
@@ -216,12 +222,12 @@
       <div class="study-steps"><article class="study-step"><span>1</span><div><h2>Теманы укыгыз</h2><p>${escapeHtml(lesson.summary || lesson.title)}</p></div></article>
       <article class="study-step book-step"><span>2</span><div><h2>«${escapeHtml(bookTitle())}»</h2><p>${ruActive() ? `Прочитайте страницы ${escapeHtml(lesson.bookPages)}.` : `${escapeHtml(lesson.bookPages)} нче ${pageWord} укыгыз.`}</p><strong>${ruActive() ? `Стр. ${escapeHtml(lesson.bookPages)}` : `${escapeHtml(lesson.bookPages)} нче бит`}</strong></div></article>
       <article class="study-step"><span>3</span><div><h2>Кабатлау</h2><p>${escapeHtml(lesson.practice || "Теманы кабатлагыз.")}</p></div></article>
-      <article class="study-step"><span>4</span><div><h2>Тест</h2><p>${ruActive() ? `Ответьте на ${lesson.questions.length} вопросов.` : `${lesson.questions.length} сорауга җавап бирегез.`}</p></div></article></div></div>
+      <article class="study-step"><span>4</span><div><h2>Тест</h2><p>${ruActive() ? `Ответьте на ${questionCountRu(lesson.questions.length)}.` : `${lesson.questions.length} сорауга җавап бирегез.`}</p></div></article></div></div>
       <div class="panel lesson-panel"><p class="eyebrow">Дәрес тесты</p><h2>${lesson.questions.length} сорау</h2><p class="panel-note">${ruActive() ? "Прочитайте указанные страницы учебника и начните тест." : "Дәреслекнең күрсәтелгән битләрен укыгыз һәм тестны башлагыз."}</p>
       <form id="studentForm"><label for="studentName">Исем һәм фамилия</label><input id="studentName" maxlength="80" autocomplete="name" required>
       ${assignedGroup ? `<p class="assigned-group"><span>Группа</span><strong>${escapeHtml(assignedGroup)}</strong></p>` : `<label for="studentGroup">Группа</label><select id="studentGroup" required>${groupOptions(activeCourseId, "Выберите группу")}</select>`}
       <label class="book-check"><input id="bookReady" type="checkbox" required><span>Дәреслекнең күрсәтелгән битләре белән эшләдем</span></label>
-      <p class="privacy-note">Результат, имя и группа отправляются в журнал преподавателя.</p><button class="primary" type="submit">Тестны башларга</button></form></div></section>`;
+      <p class="privacy-note">Нәтиҗә, исем һәм группа укытучы журналына җибәрелә.</p><button class="primary" type="submit">Тестны башларга</button></form></div></section>`;
     updateChrome();
     translateUiTree(app);
     document.getElementById("studentForm").addEventListener("submit", (event) => {
@@ -259,7 +265,7 @@
     app.querySelectorAll(".course-tab").forEach((button) => button.addEventListener("click", () => selectCourse(Number(button.dataset.course))));
     const select = document.getElementById("lessonSelect");
     const meta = document.getElementById("lessonMeta");
-    const updateMeta = () => { const lesson = findLesson(activeCourseId, Number(select.value)); meta.textContent = ruActive() ? `${lesson.questions.length} вопросов • стр. ${lesson.bookPages}` : `${lesson.questions.length} сорау • ${lesson.bookPages} нче бит`; };
+    const updateMeta = () => { const lesson = findLesson(activeCourseId, Number(select.value)); meta.textContent = ruActive() ? `${questionCountRu(lesson.questions.length)} • стр. ${lesson.bookPages}` : `${lesson.questions.length} сорау • ${lesson.bookPages} нче бит`; };
     select.addEventListener("change", updateMeta);
     document.getElementById("shareButton").addEventListener("click", () => copyLessonLink(Number(select.value)));
     updateMeta();
