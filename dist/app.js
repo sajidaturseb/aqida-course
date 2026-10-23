@@ -10,8 +10,8 @@
   const params = new URLSearchParams(window.location.search);
   const requestedCourseId = Number(params.get("course")) || 2;
   const requestedLessonId = Number(params.get("lesson"));
-  let currentLang = params.get("lang") === "ru" && requestedCourseId === 2 ? "ru" : "tt";
-  const russianLessons = window.AQIDA_COURSE_2_RU || {};
+  let currentLang = params.get("lang") === "ru" && [2, 3].includes(requestedCourseId) ? "ru" : "tt";
+  const russianLessonsFor = (courseId) => courseId === 2 ? (window.AQIDA_COURSE_2_RU || {}) : (window.AQIDA_COURSE_3_RU || {});
   const resultsEndpoint = window.AQIDA_RESULTS_ENDPOINT || "";
   let activeCourseId = catalog.courses.some((item) => item.id === requestedCourseId) ? requestedCourseId : 2;
   const assignedGroup = allowedGroups(activeCourseId).has(params.get("group")) ? params.get("group") : "";
@@ -33,6 +33,16 @@
     ["Ихсан, Аллаһы Тәгаләне танып белү һәм Аның барлыгына дәлилләр.", "Ихсан, пути познания Аллаха и доводы Его существования."],
     ["Аллаһы Тәгаләнең Күркәм Исемнәрен дөрес әйтү, аңлау һәм ныгыту.", "Произношение, понимание и повторение Прекрасных имён Аллаха."],
     ["Икенче курсның төп темаларын берләштереп кабатлау.", "Общее повторение основных тем второго курса."],
+    ["Фәрештәләргә иман", "Вера в ангелов"],
+    ["Фәрештәләрнең сыйфатлары, исемнәре, вазыйфалары һәм иманның файдасы.", "Свойства, имена и обязанности ангелов; польза веры в них."],
+    ["Изге китапларга иман", "Вера в Священные Писания"],
+    ["Сухуф, Зәбур, Тәүрат, Инҗил һәм Коръән Кәрим.", "Сухуф, Забур, Таурат, Инджил и Благородный Коран."],
+    ["Пәйгамбәрләргә иман", "Вера в пророков"],
+    ["Пәйгамбәрләр, илчеләр, аларның сыйфатлары, могҗизалар һәм кәрамәтләр.", "Пророки, посланники, их качества, чудеса и караматы."],
+    ["Ахирәткә иман", "Вера в Последнюю жизнь"],
+    ["Үлем, кабер, Кыямәт билгеләре, Мәхшәр, Сират, Җәннәт һәм Җәһәннәм.", "Смерть, могила, признаки Судного дня, Махшар, Сират, Рай и Ад."],
+    ["Тәкъдир һәм йомгаклау", "Предопределение и итоговое повторение"],
+    ["Гареш-Көрси, Ләүх әл-Мәхфуз, Каләм, тәкъдир һәм тәвәккәллек.", "Арш и Курси, Хранимая Скрижаль, Калам, предопределение и упование на Аллаха."],
     ["Гакыйдәне өйрәнүнең беренче елы", "Первый год изучения акыды"],
     ["Гакыйдәне өйрәнүнең икенче елы", "Второй год изучения акыды"],
     ["Укытучы өчен", "Для преподавателя"],
@@ -62,7 +72,7 @@
     ["Нәтиҗә җибәрелә…", "Результат отправляется…"],
     ["Нәтиҗә, исем һәм группа укытучы журналына җибәрелә.", "Результат, имя и группа отправляются в журнал преподавателя."]
   ]);
-  function ruActive() { return currentLang === "ru" && activeCourseId === 2; }
+  function ruActive() { return currentLang === "ru" && [2, 3].includes(activeCourseId); }
   function questionCountRu(count) {
     const lastTwo = count % 100;
     const last = count % 10;
@@ -70,7 +80,7 @@
   }
   function bookTitle() { return ruActive() ? "Акыда. Просто о сложном" : program.bookTitle; }
   function localizeLesson(lesson) {
-    const translated = ruActive() && lesson.course === 2 && russianLessons[lesson.id];
+    const translated = ruActive() && russianLessonsFor(lesson.course)[lesson.id];
     if (!translated) return lesson;
     if (translated.questions.length !== lesson.questions.length) throw new Error(`Incomplete translation for lesson ${lesson.id}`);
     return {
@@ -95,7 +105,7 @@
     }
   }
   function updateChrome() {
-    languageSwitch.hidden = activeCourseId !== 2;
+    languageSwitch.hidden = ![2, 3].includes(activeCourseId);
     languageSwitch.querySelectorAll("button").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.lang === currentLang)));
     document.documentElement.lang = ruActive() ? "ru" : "tt";
     document.getElementById("brandName").textContent = ruActive() ? "Курс акыды" : "Гакыйдә курсы";
@@ -165,13 +175,12 @@
     url.hash = "";
     url.searchParams.set("course", courseId);
     if (lessonId) url.searchParams.set("lesson", lessonId);
-    if (currentLang === "ru" && courseId === 2) url.searchParams.set("lang", "ru");
+    if (currentLang === "ru" && [2, 3].includes(courseId)) url.searchParams.set("lang", "ru");
     if (group) url.searchParams.set("group", group);
     return url.toString();
   }
   function selectCourse(courseId) {
     activeCourseId = courseId;
-    if (courseId !== 2) currentLang = "tt";
     const url = new URL(window.location.href);
     url.search = "";
     url.searchParams.set("course", courseId);
@@ -185,7 +194,7 @@
       const score = completed[lessonId];
       const stateClass = score >= 70 ? " completed" : (score !== undefined ? " attempted" : "");
       const status = score !== undefined ? `<span class="lesson-score">${score}%</span>` : '<span class="lesson-arrow" aria-hidden="true">→</span>';
-      const translated = ruActive() && Boolean(russianLessons[lessonId]);
+      const translated = ruActive() && Boolean(russianLessonsFor(activeCourseId)[lessonId]);
       const pageLabel = translated ? `Учебник: стр. ${escapeHtml(lesson.bookPages)}` : `Дәреслек: ${escapeHtml(lesson.bookPages)} нче бит`;
       const pendingLabel = ruActive() && !translated ? " • перевод готовится" : "";
       return `<a class="course-lesson${stateClass}" href="${escapeHtml(lessonUrl(activeCourseId, lessonId))}"><span class="lesson-index">${lessonId}</span><span class="lesson-name">${escapeHtml(lesson.title)}<small>${pageLabel}${pendingLabel}</small></span>${status}</a>`;
@@ -257,8 +266,8 @@
     }).join("");
     const lessonOptions = selected.lessons.map((source) => { const lesson = findLesson(activeCourseId, source.id); return `<option value="${lesson.id}">${ruActive() ? `Урок ${lesson.id}` : `${lesson.id} нче дәрес`} — ${escapeHtml(lesson.title)}</option>`; }).join("");
     app.innerHTML = `<section class="course-home">
-      <div class="course-intro"><div><p class="eyebrow">${ruActive() ? `По учебнику «${escapeHtml(bookTitle())}»` : `«${escapeHtml(bookTitle())}» буенча`}</p><h1>Гакыйдә курсы</h1><p class="lead">${ruActive() ? "Все 25 уроков второго курса доступны на русском языке. Третий курс пока остаётся на татарском." : "2 нче һәм 3 нче курслар. Һәр дәрестә дәреслек битләре һәм автоматик тикшерелә торган тест."}</p></div>
-      <aside class="progress-card"><span class="progress-label">${ruActive() ? "Курс 2: пройдено" : `${escapeHtml(selected.title)}: алга китеш`}</span><strong>${completedCount} / ${selected.lessons.length}</strong><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><div class="progress-bar" style="width:${progress}%"></div></div><p>${ruActive() ? `${progress}% завершено` : `${progress}% тәмамланган`}</p><a class="primary button-link" href="${escapeHtml(lessonUrl(activeCourseId, nextLesson.id))}">${completedCount ? "Дәвам итәргә" : "Беренче дәресне ачарга"}</a></aside></div>
+      <div class="course-intro"><div><p class="eyebrow">${ruActive() ? `По учебнику «${escapeHtml(bookTitle())}»` : `«${escapeHtml(bookTitle())}» буенча`}</p><h1>Гакыйдә курсы</h1><p class="lead">${ruActive() ? "Все 25 уроков второго и третьего курсов доступны на русском языке. Можно в любой момент вернуться к татарскому тексту." : "2 нче һәм 3 нче курслар. Һәр дәрестә дәреслек битләре һәм автоматик тикшерелә торган тест."}</p></div>
+      <aside class="progress-card"><span class="progress-label">${ruActive() ? `Курс ${activeCourseId}: пройдено` : `${escapeHtml(selected.title)}: алга китеш`}</span><strong>${completedCount} / ${selected.lessons.length}</strong><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><div class="progress-bar" style="width:${progress}%"></div></div><p>${ruActive() ? `${progress}% завершено` : `${progress}% тәмамланган`}</p><a class="primary button-link" href="${escapeHtml(lessonUrl(activeCourseId, nextLesson.id))}">${completedCount ? "Дәвам итәргә" : "Беренче дәресне ачарга"}</a></aside></div>
       <div class="course-tabs" aria-label="Курсны сайлау">${tabs}</div>
       <div class="course-layout"><div class="curriculum"><div class="section-heading"><div><p class="eyebrow">Уку юлы</p><h2>5 бүлек • 25 дәрес</h2></div><p>Дәреслекнең күрсәтелгән битләрен укыгыз, аннары тестны үтәгез.</p></div><div class="module-list">${modules}</div></div>
       <aside class="panel quick-panel"><p class="eyebrow">Укытучы өчен</p><h2>Дәрес сылтамасы</h2><p class="panel-note">Укучы бу сылтамада башка дәресләрне күрмәячәк.</p><label for="lessonSelect">Дәрес</label><select id="lessonSelect">${lessonOptions}</select><p class="lesson-meta" id="lessonMeta"></p><label class="share-group-label" for="shareGroup">Группа</label><select id="shareGroup">${groupOptions(activeCourseId, "Группу выберет ученик")}</select><button class="primary share-button" id="shareButton" type="button">Сылтаманы күчерергә</button><p class="share-status" id="shareStatus" aria-live="polite"></p><a class="teacher-link" href="teacher.html">Укытучы журналын ачарга</a></aside></div></section>`;
@@ -346,7 +355,7 @@
 
   homeButton.addEventListener("click", renderHome);
   languageSwitch.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
-    if (activeCourseId !== 2 || currentLang === button.dataset.lang) return;
+    if (![2, 3].includes(activeCourseId) || currentLang === button.dataset.lang) return;
     currentLang = button.dataset.lang;
     const url = new URL(window.location.href);
     if (ruActive()) url.searchParams.set("lang", "ru");
