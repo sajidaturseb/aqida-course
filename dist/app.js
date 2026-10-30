@@ -69,7 +69,6 @@
     ["Башка дәрес", "Другой урок"],
     ["Тагын бер тапкыр", "Пройти ещё раз"],
     ["Нәтиҗә", "Результат"],
-    ["Нәтиҗә җибәрелә…", "Результат отправляется…"],
     ["Нәтиҗә, исем һәм группа укытучы журналына җибәрелә.", "Результат, имя и группа отправляются в журнал преподавателя."]
   ]);
   function ruActive() { return currentLang === "ru" && [2, 3].includes(activeCourseId); }
@@ -317,7 +316,7 @@
     const message = ruActive()
       ? (percent >= 90 ? "Отличный результат!" : percent >= 70 ? "Хороший результат. Просмотрите ошибки." : "Рекомендуем ещё раз повторить тему.")
       : (percent >= 90 ? "Бик яхшы нәтиҗә. Белемнәрегез нык!" : percent >= 70 ? "Яхшы нәтиҗә. Хаталарны карап чыгыгыз." : "Теманы тагын бер кабатларга киңәш итәбез.");
-    app.innerHTML = `<section class="result-card"><div class="result-top"><div class="score-ring" style="--score:${percent * 3.6}deg"><strong>${percent}%</strong></div><div><p class="eyebrow">Тест тәмамланды</p><h2>${ruActive() ? `${score} / ${total} правильных ответов` : `${score} / ${total} дөрес`}</h2><p class="result-summary">${message}</p></div></div><div class="result-actions"><button class="secondary" id="homeResult" type="button">${lockedLesson ? "Дәрес башына" : "Башка дәрес"}</button><button class="primary" id="retryButton" type="button">Тагын бер тапкыр</button></div>${lockedLesson ? '<p class="submission-status" id="submissionStatus" aria-live="polite">Нәтиҗә җибәрелә…</p>' : ""}<div class="review"><h3>${mistakes.length ? (ruActive() ? `Разбор ошибок (${mistakes.length})` : `Хаталар өстендә эш (${mistakes.length})`) : "Нәтиҗә"}</h3><div class="review-list">${review}</div></div></section>`;
+    app.innerHTML = `<section class="result-card"><div class="result-top"><div class="score-ring" style="--score:${percent * 3.6}deg"><strong>${percent}%</strong></div><div><p class="eyebrow">Тест тәмамланды</p><h2>${ruActive() ? `${score} / ${total} правильных ответов` : `${score} / ${total} дөрес`}</h2><p class="result-summary">${message}</p></div></div><div class="result-actions"><button class="secondary" id="homeResult" type="button">${lockedLesson ? "Дәрес башына" : "Башка дәрес"}</button><button class="primary" id="retryButton" type="button">Тагын бер тапкыр</button></div>${lockedLesson ? '<p class="submission-status" id="submissionStatus" role="status" aria-live="polite"></p><button class="primary result-send-retry" id="retrySubmission" type="button" hidden>Кабат җибәрергә</button>' : ""}<div class="review"><h3>${mistakes.length ? (ruActive() ? `Разбор ошибок (${mistakes.length})` : `Хаталар өстендә эш (${mistakes.length})`) : "Нәтиҗә"}</h3><div class="review-list">${review}</div></div></section>`;
     updateChrome();
     translateUiTree(app);
     document.getElementById("homeResult").addEventListener("click", renderHome);
@@ -328,10 +327,9 @@
 
   async function submitResult(score, total, percent) {
     const status = document.getElementById("submissionStatus");
-    if (!resultsEndpoint) {
-      if (status) status.textContent = ruActive() ? "Отправка результатов временно не настроена." : "Нәтиҗәләрне җибәрү вакытлыча көйләнмәгән.";
-      return;
-    }
+    const retry = document.getElementById("retrySubmission");
+    const languageAtSubmission = ruActive() ? "ru" : "tt";
+    const message = (tatar, russian) => languageAtSubmission === "ru" ? russian : tatar;
     const payload = {
       studentName: state.student.name,
       group: state.student.group,
@@ -343,14 +341,28 @@
       attemptId: state.attemptId,
       answers: state.lesson.questions.map((question, index) => ({ number: question.number, selected: state.answers[index] || "", correct: question.answer, isCorrect: state.answers[index] === question.answer }))
     };
-    try {
-      const response = await fetch(resultsEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok || !result.ok) throw new Error(result.error || "request_failed");
-      if (status) status.textContent = ruActive() ? "Результат отправлен преподавателю." : "Нәтиҗә укытучыга җибәрелде.";
-    } catch (_) {
-      if (status) status.textContent = ruActive() ? "Не удалось отправить результат. Проверьте соединение и попробуйте ещё раз." : "Нәтиҗәне җибәреп булмады. Интернетны тикшереп, кабатлап карагыз.";
+    async function send() {
+      retry.hidden = true;
+      retry.disabled = true;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 15000);
+      try {
+        if (!resultsEndpoint) throw new Error("endpoint_unavailable");
+        const response = await fetch(resultsEndpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal: controller.signal });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) throw new Error(result.error || "request_failed");
+        status.textContent = message("Эшегез укытучы журналына теркәлде.", "Ваша работа записана в журнале преподавателя.");
+      } catch (_) {
+        status.textContent = message("Эшегез журналга теркәлмәде. Кабат җибәрергә кирәк.", "Работа не записана в журнале. Отправьте ещё раз.");
+        retry.textContent = message("Кабат җибәрергә", "Отправить ещё раз");
+        retry.hidden = false;
+      } finally {
+        clearTimeout(timer);
+        retry.disabled = false;
+      }
     }
+    retry.addEventListener("click", send);
+    send();
   }
 
   homeButton.addEventListener("click", renderHome);
